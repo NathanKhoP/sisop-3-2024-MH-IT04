@@ -19,6 +19,20 @@
 // #define DEBUG
 #define MAX_LEN 1024
 
+void log_func(char* who, char* cmd, char* arg) {
+    // Time
+    time_t T;
+    struct tm tm;
+    T = time(NULL);
+    tm = *localtime(&T);
+
+    FILE *log = fopen("/home/etern1ty/sisop_works/modul_3/soal_3/server/race.log", "a");
+    if (log != NULL) {
+        fprintf(log, "[%s] [%02d/%02d/%02d %02d:%02d:%02d]: [%s] [%s]\n", who, tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, cmd, arg);
+        fclose(log);
+    }
+}
+
 int main() {
     // Creating RPC (Modul)
     int serv_socket, cli_socket;
@@ -72,11 +86,12 @@ int main() {
     if ((chdir("/")) < 0) {
         exit(EXIT_FAILURE);
     }
-    // close(STDIN_FILENO);
-    // close(STDOUT_FILENO);
-    // close(STDERR_FILENO);
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
 
     char cmd[MAX_LEN], stat[MAX_LEN], *resp;
+    int mark;
 
     while (1) {
         // accept incoming connection
@@ -108,6 +123,8 @@ int main() {
         #endif
 
         resp = NULL;
+        mark = 1;
+        
         // Handling args
         sscanf(buffer, "%s %s", cmd, stat);
         if (strcmp(cmd, "Gap") == 0) {
@@ -124,6 +141,14 @@ int main() {
         }
         else if (strcmp(cmd, "Tire_Change") == 0) {
             resp = tire_change(stat);
+        }
+        else {
+            mark = 0;
+        }
+
+        log_func("Driver", cmd, stat);
+        if (mark) {
+            log_func("Paddock", cmd, resp);
         }
 
         if (resp != NULL && send(cli_socket, resp, strlen(resp), 0) < 0){

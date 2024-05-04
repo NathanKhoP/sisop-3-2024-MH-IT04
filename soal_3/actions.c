@@ -9,8 +9,8 @@ char* gap_func(float gap) {
 }
 
 char* fuel_func(float fuel) {
-    if (fuel > 0.8) return "Push Push Push";
-    else if (fuel >= 0.5) return "You can go";
+    if (fuel > 80) return "Push Push Push";
+    else if (fuel >= 50) return "You can go";
     else return "Conserve Fuel";
 }
 
