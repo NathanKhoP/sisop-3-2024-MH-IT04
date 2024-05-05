@@ -35,8 +35,6 @@ int main(int argc, char const* argv[]) {
     return -1;
     }
 
-
-
   char cmd[100];
 
   while (1) {
@@ -44,80 +42,25 @@ int main(int argc, char const* argv[]) {
     scanf("%[^\n]", cmd);
     getchar(); // Membersihkan karakter newline dari buffer stdin
 
-    send(sock, cmd, strlen(cmd), 0);
 
-    if (strcmp(cmd, "exit") == 0) {
-      printf("Server:\n");
-      printf("Exiting the client\n");
-      break; // Keluar dari loop
-      }
-    else if (strcmp(cmd, "tampilkan") == 0) {
-      printf("Server:\n");
-      system("cat ../myanimelist.csv | awk '{print NR \". \" $0}'");
-      }
-    else if (strncmp(cmd, "hari ", 5) == 0) {
-      char* hari = cmd + 5; // Mengambil string setelah "hari "
-      char command[100];
-      sprintf(command, "grep '^%s,' ../myanimelist.csv | awk -F, '{print NR \". \" $3}'", hari);
-      printf("Server:\n");
-      system(command);
-      }
-    else if (strncmp(cmd, "genre ", 6) == 0) {
-      char* genre = cmd + 6; // Mengambil string setelah "genre "
-      char command[100];
-      sprintf(command, "grep ',%s,' ../myanimelist.csv | awk -F, '{print NR \". \" $3}'", genre);
-      printf("Server:\n");
-      system(command);
-      }
-    else if (strncmp(cmd, "add ", 4) == 0) {
-      char* data = cmd + 4;
-      char command[100];
-      sprintf(command, "echo \"%s\" >> ../myanimelist.csv", data);
-      printf("Server:\n");
-      system(command);
-      printf("Anime berhasil ditambahkan\n");
-      }
-    else if (strncmp(cmd, "status ", 7) == 0) {
-      char* name = cmd + 7;
-      char command[100];
-      sprintf(command, "grep ',%s,' ../myanimelist.csv | awk -F, '{print $4}'", name);
-      printf("Server:\n");
-      system(command);
-      }
-    else if (strncmp(cmd, "edit ", 5) == 0) {
-      char* input = cmd + 5;
-      char command[250];
+    if (strlen(cmd) > 0) {
+      send(sock, cmd, strlen(cmd), 0);
 
-      // Pisahkan input berdasarkan koma
-      char* anime = strtok(input, ",");
-      char* hari = strtok(NULL, ",");
-      char* genre = strtok(NULL, ",");
-      char* judul = strtok(NULL, ",");
-      char* status = strtok(NULL, ",");
+      // Membaca data dari server
+      char full_output[8192] = { 0 }; // Menampung seluruh output dalam satu string
+      valread = read(sock, full_output, sizeof(full_output));
+      if (valread > 0) {
+        printf("Server:\n%s\n", full_output); // Menampilkan seluruh output
+        }
 
-      // Membangun perintah untuk mengedit file CSV menggunakan perintah awk
-      sprintf(command, "awk -F, '{ if ($3 == \"%s\") { print \"%s,%s,%s,%s\" } else { print $0 } }' ../myanimelist.csv > temp.csv && mv temp.csv ../myanimelist.csv", anime, hari, genre, judul, status);
-
-      printf("Server:\n");
-      system(command);
-      printf("Data telah diubah.\n");
+      if (strcmp(cmd, "exit") == 0) {
+        break;
+        }
+      // Mereset buffer setelah pemrosesan perintah
+      memset(buffer, 0, 1024);
       }
-    else if (strncmp(cmd, "delete ", 7) == 0) {
-      char* anime = cmd + 7;
-      char command[200];
 
-      // Membangun perintah untuk menghapus baris berdasarkan nama anime menggunakan awk
-      sprintf(command, "awk -F, '$3 != \"%s\"' ../myanimelist.csv > temp.csv && mv temp.csv ../myanimelist.csv", anime);
-
-      printf("Server:\n");
-      system(command);
-      printf("Data telah dihapus.\n");
-      }
-    else {
-      printf("Invalid Command\n");
-      }
     }
-
+  close(sock);
   return 0;
-
   }
