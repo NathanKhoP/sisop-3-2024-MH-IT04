@@ -12,6 +12,8 @@ int main() {
     char filename[MAX_FILENAME_LENGTH];
     time_t rawtime;
     struct tm *timeinfo;
+    char fileType[MAX_FILENAME_LENGTH] = "Trash Can";
+    char fileName[MAX_FILENAME_LENGTH] = "belobog_trashcan.csv";
 
     fp = fopen("db.log", "a");
     if (fp == NULL) {
@@ -22,9 +24,10 @@ int main() {
     time(&rawtime);
     timeinfo = localtime(&rawtime);
 
-    fprintf(fp, "[%02d/%02d/%02d %02d:%02d:%02d] [type] [filename]\n",
+    fprintf(fp, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] [%s]\n",
             timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year % 100,
-            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec,
+            fileType, fileName);
 
     fclose(fp);
 
