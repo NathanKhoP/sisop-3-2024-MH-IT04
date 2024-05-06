@@ -288,11 +288,40 @@ Defined variables:
 		[Driver] : [Fuel] [55%]
 		[Paddock]: [You can go]
 
+Sesuai soal, saya membuat functions untuk tiap kasus:
+
+```c
+char* gap_func(float gap) {
+    if (gap <= 3.5) return "Gogogo";
+    else if (gap <= 10) return "Push";
+    else return "Stay out of trouble";
+}
+
+char* fuel_func(float fuel) {
+    if (fuel > 80) return "Push Push Push";
+    else if (fuel >= 50) return "You can go";
+    else return "Conserve Fuel";
+}
+
+char* tire_func(int tire) {
+    if (tire > 80) return "Go Push Go Push";
+    else if (tire >= 50) return "Good Tire Wear";
+    else if (tire > 30) return "Conserve Your Tire";
+    else return "Box Box Box";
+}
+
+char* tire_change(char* type) {
+    if (strcmp(type, "Soft") == 0) return "Mediums Ready";
+    else if (strcmp(type, "Medium") == 0) return "Box for Softs";
+}
+```
+
 > c. Pada paddock.c program berjalan secara daemon di background, bisa terhubung dengan driver.c melalui socket RPC.
 
 > d. Program paddock.c dapat call function yang berada di dalam actions.c.
 
 > e. Program paddock.c tidak keluar/terminate saat terjadi error dan akan log semua percakapan antara paddock.c dan driver.c di dalam file race.log
+> 
 > Format log:
 ```log
 [Source] [DD/MM/YY hh:mm:ss]: [Command] [Additional-info]
