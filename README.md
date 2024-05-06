@@ -125,13 +125,10 @@ char* intstr(int num) {
 Karena operasi yang dilakukan memiliki batas 9*9, maka saya buat fungsi ini untuk mengubah hanya sampai 81. Kemudian saya masukkan result ke fungsi ini, dan menggunakan strcpy untuk menyimpan result berbentuk str: `strcpy(strres, intstr(result));`
 
 > d. Max ingin membuat program kalkulator dapat melakukan penjumlahan, pengurangan, dan pembagian, maka pada program buatlah argumen untuk menjalankan program : 
->> perkalian	: ./kalkulator -kali
-
->> penjumlahan	: ./kalkulator -tambah
-
->> pengurangan	: ./kalkulator -kurang
-
->> pembagian	: ./kalkulator -bagi
+> - perkalian	: ./kalkulator -kali
+> - penjumlahan	: ./kalkulator -tambah
+> - pengurangan	: ./kalkulator -kurang
+> - pembagian	: ./kalkulator -bagi
 
 Beberapa hari kemudian karena Max terpaksa keluar dari Australian Grand Prix 2024 membuat Max tidak bersemangat untuk melanjutkan programnya sehingga kalkulator yang dibuatnya cuma menampilkan hasil positif jika bernilai negatif maka program akan print “ERROR” serta cuma menampilkan bilangan bulat jika ada bilangan desimal maka dibulatkan ke bawah.
 
@@ -177,13 +174,10 @@ int opr_func() {
 Sekarang program sudah bisa mengeksekusi operasi perkalian, penambahan, pengurangan, dan pembagian. 
 
 > e. Setelah diberi semangat, Max pun melanjutkan programnya dia ingin (pada child process) kalimat akan di print dengan contoh format : 
->> perkalian	: “hasil perkalian tiga dan tujuh adalah dua puluh satu.”
-
->> penjumlahan	: “hasil penjumlahan tiga dan tujuh adalah sepuluh.”
-
->> pengurangan	: “hasil pengurangan tujuh dan tiga adalah empat.”
-
->> pembagian	: “hasil pembagian tujuh dan tiga adalah dua.”
+> - perkalian	: “hasil perkalian tiga dan tujuh adalah dua puluh satu.”
+> - penjumlahan	: “hasil penjumlahan tiga dan tujuh adalah sepuluh.”
+> - pengurangan	: “hasil pengurangan tujuh dan tiga adalah empat.”
+> - pembagian	: “hasil pembagian tujuh dan tiga adalah dua.”
 
 Saya pun membuat switch case lagi menggunakan program_mode untuk menentukan output:
 
@@ -259,10 +253,66 @@ Dimana output juga dipengaruhi oleh program_mode.
 
 ## Deskripsi Soal
 
+Shall Leglerg🥶 dan Carloss Signs 😎 adalah seorang pembalap F1 untuk tim Ferrari 🥵. Mobil F1 memiliki banyak pengaturan, seperti penghematan ERS, Fuel, Tire Wear dan lainnya. Pada minggu ini ada race di sirkuit Silverstone. Malangnya, seluruh tim Ferrari diracun oleh Super Max Max pada hari sabtu sehingga seluruh kru tim Ferrari tidak bisa membantu Shall Leglerg🥶 dan Carloss Signs 😎 dalam race. Namun, kru Ferrari telah menyiapkan program yang bisa membantu mereka dalam menyelesaikan race secara optimal. Program yang dibuat bisa mengatur pengaturan - pengaturan dalam mobil F1 yang digunakan dalam balapan.
+
 ### Catatan
+
+Directory:
+```
+├── client
+│   └── driver.c
+└── server
+    ├── actions.c
+    ├── paddock.c
+    └── race.log
+```
+
+Port yang digunakan: 8080
+IP: 127.0.0.1
+
+Defined variables:
+`#define MAX_LEN 1024`
 
 ## Pengerjaan
 
+> a. Pada program actions.c, program akan berisi function function yang bisa di call oleh paddock.c
+
+> b. Action berisikan sebagai berikut:
+> - Gap [Jarak dengan driver di depan (float)]: Jika Jarak antara Driver dengan Musuh di depan adalah < 3.5s maka return Gogogo, jika jarak > 3.5s dan 10s return Push, dan jika jarak > 10s maka return Stay out of trouble.
+> - Fuel [Sisa Bensin% (string/int/float)]: Jika bensin lebih dari 80% maka return Push Push Push, jika bensin di antara 50% dan 80% maka return You can go, dan jika bensin kurang dari 50% return Conserve Fuel.
+> - Tire [Sisa Ban (int)]: Jika pemakaian ban lebih dari 80 maka return Go Push Go Push, jika pemakaian ban diantara 50 dan 80 return Good Tire Wear, jika pemakaian di antara 30 dan 50 return Conserve Your Tire, dan jika pemakaian ban kurang dari 30 maka return Box Box Box.
+> - Tire Change [Tipe ban saat ini (string)]: Jika tipe ban adalah Soft return Mediums Ready, dan jika tipe ban Medium return Box for Softs.
+
+		Contoh:
+		[Driver] : [Fuel] [55%]
+		[Paddock]: [You can go]
+
+> c. Pada paddock.c program berjalan secara daemon di background, bisa terhubung dengan driver.c melalui socket RPC.
+
+> d. Program paddock.c dapat call function yang berada di dalam actions.c.
+
+> e. Program paddock.c tidak keluar/terminate saat terjadi error dan akan log semua percakapan antara paddock.c dan driver.c di dalam file race.log
+```
+Format log:
+[Source] [DD/MM/YY hh:mm:ss]: [Command] [Additional-info]
+ex :
+[Driver] [07/04/2024 08:34:50]: [Fuel] [55%]
+[Paddock] [07/04/2024 08:34:51]: [Fuel] [You can go]
+```
+
+> f. Program driver.c bisa terhubung dengan paddock.c dan bisa mengirimkan pesan dan menerima pesan serta menampilan pesan tersebut dari paddock.c sesuai dengan perintah atau function call yang diberikan.
+>
+> Jika bisa digunakan antar device/os (non local) akan diberi nilai tambahan.
+untuk mengaktifkan RPC call dari driver.c, bisa digunakan in-program CLI atau Argv (bebas) yang penting bisa send command seperti poin B dan menampilkan balasan dari paddock.c
+>	
+> Contoh:
+```
+Argv: 
+./driver -c Fuel -i 55% 
+in-program CLI:
+Command: Fuel
+Info: 55%
+```
 
 
 # Soal 4
