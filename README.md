@@ -14,3 +14,41 @@
 - [Soal 2](#soal-2)
 - [Soal 3](#soal-3)
 - [Soal 4](#soal-4)
+
+# Soal 1
+
+## Deskripsi Soal
+
+### Catatan
+
+## Pengerjaan
+
+
+# Soal 2
+
+## Deskripsi Soal
+
+### Catatan
+
+## Pengerjaan
+
+
+
+# Soal 3
+
+## Deskripsi Soal
+
+### Catatan
+
+## Pengerjaan
+
+
+
+# Soal 4
+
+## Deskripsi Soal
+
+### Catatan
+
+## Pengerjaan
+
