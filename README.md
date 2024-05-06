@@ -251,6 +251,10 @@ FILE *log = fopen("history.log", "a");
 
 Dimana output juga dipengaruhi oleh program_mode. 
 
+## Output
+
+![soal_2 output](assets/soal2_out.png)
+
 # Soal 3
 
 ## Deskripsi Soal
