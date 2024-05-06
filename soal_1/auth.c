@@ -15,11 +15,11 @@ int main() {
             int len = strlen(filename);
             if (len >= 13 && strcmp(filename + len - 13, "bolobog_trashcan.csv") == 0) {
                 char command[MAX_FILENAME_LENGTH];
-                sprintf(command, "cp new-data/%s /dev/shm/%s", filename, filename);
+                sprintf(command, "cp new-data/%s /Documents/dev/shm/%s", filename, filename);
                 system(command);
             } else if (len >= 16 && strcmp(filename + len - 16, "osaka_parkinglot.csv") == 0) {
                 char command[MAX_FILENAME_LENGTH];
-                sprintf(command, "cp new-data/%s /dev/shm/%s", filename, filename);
+                sprintf(command, "cp new-data/%s /Documents/dev/shm/%s", filename, filename);
                 system(command);
             } else {
                 char command[MAX_FILENAME_LENGTH];
