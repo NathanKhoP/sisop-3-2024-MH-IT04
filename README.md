@@ -174,6 +174,8 @@ int opr_func() {
 }
 ```
 
+Sekarang program sudah bisa mengeksekusi operasi perkalian, penambahan, pengurangan, dan pembagian. 
+
 > e. Setelah diberi semangat, Max pun melanjutkan programnya dia ingin (pada child process) kalimat akan di print dengan contoh format : 
 >> perkalian	: “hasil perkalian tiga dan tujuh adalah dua puluh satu.”
 
@@ -182,6 +184,28 @@ int opr_func() {
 >> pengurangan	: “hasil pengurangan tujuh dan tiga adalah empat.”
 
 >> pembagian	: “hasil pembagian tujuh dan tiga adalah dua.”
+
+Saya pun membuat switch case lagi menggunakan program_mode untuk menentukan output:
+
+```c
+char* output_type () {
+    switch (program_mode) {
+        case 0:
+            return "perkalian";
+        case 1:
+            return "penjumlahan";
+        case 2:
+            return "pengurangan";
+        case 3:
+            return "pembagian";
+        default:
+            exit(EXIT_FAILURE);
+    }
+}
+```
+
+Kemudian kita lakukan printf terhadap hasil sesuai format soal:
+`printf("hasil %s %s dan %s adalah %s\n", output_type(), input1, input2, strres);`
 
 > f. Max ingin hasil dari setiap perhitungan dicatat dalam sebuah log yang diberi nama histori.log. Pada parent process, lakukan pembuatan file log berdasarkan data yang dikirim dari child process. 
 
@@ -194,8 +218,38 @@ Ex:
 [10/03/24 00:30:12] [KURANG] ERROR pada pengurangan.
 ```
 
+Pertama saya menambahkan `write(fd2[1], strres, strlen(strres)+1);` di child process sebelum close, kemudian menambahkan `read(fd2[0], strres, sizeof(strres));` di parent process untuk melakukan logging.
 
+Saya inisialisasikan dulu global variable T dan tm:
 
+```c
+T = time(NULL);
+tm = *localtime(&T);
+```
+
+Sekarang saya melakukan fopen biasa:
+
+```c
+FILE *log = fopen("history.log", "a");
+        if (log != NULL) {
+            if (strcmp(strres, "ERROR") == 0) {
+                fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] ERROR pada %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), output_type());
+            }
+            else {
+                if (program_mode == 0) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kali %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 1) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s tambah %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 2) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kurang %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 3) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s bagi %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+            }
+            fclose(log);
+        }
+        else {
+            perror("Failed to open log file");
+            exit(EXIT_FAILURE);
+        }
+```
+
+Dimana output juga dipengaruhi oleh program_mode. 
 
 # Soal 3
 
