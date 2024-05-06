@@ -202,11 +202,12 @@ Kemudian kita lakukan printf terhadap hasil sesuai format soal:
 `printf("hasil %s %s dan %s adalah %s\n", output_type(), input1, input2, strres);`
 
 > f. Max ingin hasil dari setiap perhitungan dicatat dalam sebuah log yang diberi nama histori.log. Pada parent process, lakukan pembuatan file log berdasarkan data yang dikirim dari child process. 
+> 
+> - Format: [date] [type] [message]
+> - Type: KALI, TAMBAH, KURANG, BAGI
+> - Ex:
 
 ```
-Format: [date] [type] [message]
-Type: KALI, TAMBAH, KURANG, BAGI
-Ex:
 [10/03/24 00:29:47] [KALI] tujuh kali enam sama dengan empat puluh dua.
 [10/03/24 00:30:00] [TAMBAH] sembilan tambah sepuluh sama dengan sembilan belas.
 [10/03/24 00:30:12] [KURANG] ERROR pada pengurangan.
@@ -292,8 +293,8 @@ Defined variables:
 > d. Program paddock.c dapat call function yang berada di dalam actions.c.
 
 > e. Program paddock.c tidak keluar/terminate saat terjadi error dan akan log semua percakapan antara paddock.c dan driver.c di dalam file race.log
-```
-Format log:
+> Format log:
+```log
 [Source] [DD/MM/YY hh:mm:ss]: [Command] [Additional-info]
 ex :
 [Driver] [07/04/2024 08:34:50]: [Fuel] [55%]
@@ -306,7 +307,7 @@ ex :
 untuk mengaktifkan RPC call dari driver.c, bisa digunakan in-program CLI atau Argv (bebas) yang penting bisa send command seperti poin B dan menampilkan balasan dari paddock.c
 >	
 > Contoh:
-```
+```bash
 Argv: 
 ./driver -c Fuel -i 55% 
 in-program CLI:
