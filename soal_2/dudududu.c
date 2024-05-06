@@ -153,20 +153,34 @@ int opr_func() {
     }
 }
 
-char* output_type (char **argv) {
-    if (strcmp(argv[1], "-kali") == 0) return "perkalian";
-    else if (strcmp(argv[1], "-tambah") == 0) return "penjumlahan";
-    else if (strcmp(argv[1], "-kurang") == 0) return "pengurangan";
-    else if (strcmp(argv[1], "-bagi") == 0) return "pembagian";
-    else exit(EXIT_FAILURE);
+char* output_type () {
+    switch (program_mode) {
+        case 0:
+            return "perkalian";
+        case 1:
+            return "penjumlahan";
+        case 2:
+            return "pengurangan";
+        case 3:
+            return "pembagian";
+        default:
+            exit(EXIT_FAILURE);
+    }
 }
 
-char* log_out (char **argv) {
-    if (strcmp(argv[1], "-kali") == 0) return "KALI";
-    else if (strcmp(argv[1], "-tambah") == 0) return "TAMBAH";
-    else if (strcmp(argv[1], "-kurang") == 0) return "KURANG";
-    else if (strcmp(argv[1], "-bagi") == 0) return "BAGI";
-    else exit(EXIT_FAILURE);
+char* log_out () {
+    switch (program_mode) {
+        case 0:
+            return "KALI";
+        case 1:
+            return "TAMBAH";
+        case 2:
+            return "KURANG";
+        case 3:
+            return "BAGI";
+        default:
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -239,13 +253,13 @@ int main(int argc, char *argv[]) {
         FILE *log = fopen("history.log", "a");
         if (log != NULL) {
             if (strcmp(strres, "ERROR") == 0) {
-                fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] ERROR pada %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(argv), output_type(argv));
+                fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] ERROR pada %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), output_type());
             }
             else {
-                if (program_mode == 0) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kali %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(argv), input1, input2, strres);
-                else if (program_mode == 1) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s tambah %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(argv), input1, input2, strres);
-                else if (program_mode == 2) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kurang %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(argv), input1, input2, strres);
-                else if (program_mode == 3) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s bagi %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(argv), input1, input2, strres);
+                if (program_mode == 0) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kali %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 1) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s tambah %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 2) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s kurang %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
+                else if (program_mode == 3) fprintf(log, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] %s bagi %s sama dengan %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec, log_out(), input1, input2, strres);
             }
             fclose(log);
         }
@@ -271,7 +285,7 @@ int main(int argc, char *argv[]) {
         //     strcpy(input2, temp);
         // }
 
-        printf("hasil %s %s dan %s adalah %s\n", output_type(argv), input1, input2, strres);
+        printf("hasil %s %s dan %s adalah %s\n", output_type(), input1, input2, strres);
 
         close(fd2[0]);
         write(fd2[1], strres, strlen(strres)+1);
