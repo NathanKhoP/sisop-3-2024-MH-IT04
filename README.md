@@ -318,7 +318,27 @@ char* tire_change(char* type) {
 
 > c. Pada paddock.c program berjalan secara daemon di background, bisa terhubung dengan driver.c melalui socket RPC.
 
+Karena paddock berjalan sebagai daemon dan bertindak sebagai server, maka saya pertama mengambil kode RPC server dari modul kemudian kode untuk membuat program menjadi daemon setelah dilakukan listen di port yang ditentukan (8080), dan untuk accept sampai output dilakukan didalam while(1).
+
 > d. Program paddock.c dapat call function yang berada di dalam actions.c.
+
+```c
+// ... (kode modul untuk RPC)
+
+if (listen(serv_socket, 3) < 0) {
+    perror("Listen failed");
+    exit(EXIT_FAILURE);
+}
+
+// ... (kode modul untuk daemon)
+
+while (1) {
+    // accept
+    // read buffer
+
+    // pemangillan actions.c sesuai argv yang akan dilakukan nanti
+}
+```
 
 > e. Program paddock.c tidak keluar/terminate saat terjadi error dan akan log semua percakapan antara paddock.c dan driver.c di dalam file race.log
 > 
@@ -331,9 +351,8 @@ ex :
 ```
 
 > f. Program driver.c bisa terhubung dengan paddock.c dan bisa mengirimkan pesan dan menerima pesan serta menampilan pesan tersebut dari paddock.c sesuai dengan perintah atau function call yang diberikan.
->
-> Jika bisa digunakan antar device/os (non local) akan diberi nilai tambahan.
-untuk mengaktifkan RPC call dari driver.c, bisa digunakan in-program CLI atau Argv (bebas) yang penting bisa send command seperti poin B dan menampilkan balasan dari paddock.c
+
+> h. Untuk mengaktifkan RPC call dari driver.c, bisa digunakan in-program CLI atau Argv (bebas) yang penting bisa send command seperti poin B dan menampilkan balasan dari paddock.c
 >	
 > Contoh:
 ```bash
@@ -343,6 +362,120 @@ in-program CLI:
 Command: Fuel
 Info: 55%
 ```
+
+
+
+Saya memutuskan untuk memakai argv untuk soal ini.
+
+Paddock:
+```c
+char cmd[MAX_LEN], stat[MAX_LEN], *resp;
+    int mark;
+
+while (1) {
+    // accept incoming connection...
+
+    // clear buffer + read
+    memset(buffer, 0, MAX_LEN);
+    int cli_buf = read(cli_socket, buffer, MAX_LEN);
+    if (cli_buf < 0) {
+        perror("Read failed");
+        break;
+    } 
+    else if (cli_buf == 0) {
+        break;
+    }
+
+    resp = NULL;
+    mark = 1;
+
+    // Handling args
+    sscanf(buffer, "%s %s", cmd, stat);
+    if (strcmp(cmd, "Gap") == 0) {
+        float cur_gap = atof(stat); 
+        resp = gap_func(cur_gap);
+    }
+    else if (strcmp(cmd, "Fuel") == 0) {
+        float cur_fuel = atof(stat);
+        resp = fuel_func(cur_fuel);
+    }
+    else if (strcmp(cmd, "Tire") == 0) {
+        int cur_tire = atoi(stat);
+        resp = tire_func(cur_tire);
+    }
+    else if (strcmp(cmd, "Tire_Change") == 0) {
+        resp = tire_change(stat);
+    }
+    else {
+        mark = 0;
+    }
+
+    log_func("Driver", cmd, stat);
+    if (mark) {
+        log_func("Paddock", cmd, resp);
+    }
+
+    if (resp != NULL && send(cli_socket, resp, strlen(resp), 0) < 0){
+        perror("Send buffer failed");
+    };
+
+    close(cli_socket);
+    sleep(5);
+}
+```
+
+Penggunaan strcmp dilakukan untuk membandingkan arg yang diterima dari client yaitu driver kemudian melakukan fungsi yang sesuai. Log untuk paddock dijalankan hanya ketika paddock masuk ke salah satu if else, jika tidak maka hanya log driver yang dicatat. Kemudian dilakukan send buffer untuk response ke client kembali.
+
+Driver:
+```c
+int main(int argc, char *argv[]) {
+    // RPC client (Modul)
+
+    char buf[MAX_LEN], resp[MAX_LEN];
+    char space = ' ';
+    char arg1[MAX_LEN];
+
+    if (argc < 5) {
+        printf("Usage: %s [-cmd <arg>] [-stat <arg>]\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    // Pengecekan posisi arg yang berbeda, sehingga:
+    // -cmd ... -stat ... dan -stat ... -cmd ... sama sama bekerja, 
+    // seperti program yang menggunakan argv pada umumnya
+
+    else if ((strcmp(argv[1], "-cmd") == 0 && strcmp(argv[3], "-stat") == 0) || (strcmp(argv[1], "-stat") == 0 && strcmp(argv[3], "-cmd") == 0)) {
+        if (strcmp(argv[1], "-cmd") == 0) {
+            strcpy(arg1, argv[2]);
+            strncat(arg1, &space, 1);
+            strcpy(buf, strcat(arg1, argv[4]));
+        } 
+        else {
+            strcpy(arg1, argv[4]);
+            strncat(arg1, &space, 1);
+            strcpy(buf, strcat(arg1, argv[2]));
+        }
+
+        // send buffer
+        printf("Driver  : [%s]\n", buf);
+        send(sock, buf, strlen(buf), 0);
+        memset(resp, 0, MAX_LEN);
+
+        // read response -> output
+        int ser_buf = read(sock, resp, MAX_LEN);
+        resp[ser_buf] = '\0';
+        printf("Paddock : [%s]\n", resp);
+    }
+    return 0;
+}
+```
+
+Untuk cara menggunakan driver, menggunakan argumen -cmd dan -stat, dimana cmd yaitu command yang dipass ke paddock, dan stat yaitu status dari command yang diberikan. Kemudian dilakukan send dan read response ke paddock untuk output dan log.
+
+> g. Jika bisa digunakan antar device/os (non local) akan diberi nilai tambahan. (Tidak dikerjakan)
+
+## Output
+
 
 
 # Soal 4
