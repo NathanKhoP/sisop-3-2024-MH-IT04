@@ -476,7 +476,7 @@ Untuk cara menggunakan driver, menggunakan argumen -cmd dan -stat, dimana cmd ya
 
 ## Output
 
-
+![output soal_3](assets/soal3_out.png)
 
 # Soal 4
 
