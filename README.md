@@ -472,7 +472,32 @@ int main(int argc, char *argv[]) {
 
 Untuk cara menggunakan driver, menggunakan argumen -cmd dan -stat, dimana cmd yaitu command yang dipass ke paddock, dan stat yaitu status dari command yang diberikan. Kemudian dilakukan send dan read response ke paddock untuk output dan log.
 
-> g. Jika bisa digunakan antar device/os (non local) akan diberi nilai tambahan. (Tidak dikerjakan)
+> g. Jika bisa digunakan antar device/os (non local) akan diberi nilai tambahan. 
+
+Dilakukan penambahan di driver.c
+
+```c
+#include <netdb.h>
+#include <netinet/in.h>
+
+#define IP "192.168.1.21" // cek ip host - ifconfig
+
+int main(int argc, char *argv[]) {
+// ...
+struct hostent *address;
+// ...
+
+if (sock < 0) {
+        perror("Error opening socket");
+        address = gethostbyname(IP);
+        if (address == NULL) {
+            fprintf(stderr, "ERROR, no such host\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+// ...
+}
+```
 
 ## Output
 
