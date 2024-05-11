@@ -519,11 +519,13 @@ Lewis Hamilton 🏎 seorang wibu akut dan sering melewatkan beberapa episode yan
 
 ### Catatan
 
+```bash
 soal_4
 ├── client
 │ └── client.c
 └── server
 └── server.c
+```
 
 ## Pengerjaan
 
