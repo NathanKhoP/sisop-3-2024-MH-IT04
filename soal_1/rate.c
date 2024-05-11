@@ -26,7 +26,7 @@ int main() {
     float rating;
     char type[MAX_FILENAME_LENGTH];
 
-    file = fopen("/Documents/dev/shm/belobog_trashcan.csv", "r");
+    file = fopen("/Documents/microservices/database/belobog_trashcan.csv", "r");
     if (file) {
         while (fscanf(file, "%s %f", filename, &rating) == 2) {
             if (rating > trashCan.rating) {
@@ -37,7 +37,7 @@ int main() {
         fclose(file);
     }
 
-    file = fopen("/Documents/dev/shm/osaka_parkinglot.csv", "r");
+    file = fopen("/Documents/microservices/database/osaka_parkinglot.csv", "r");
     if (file) {
         while (fscanf(file, "%s %f", filename, &rating) == 2) {
             if (rating > parkingLot.rating) {
