@@ -26,6 +26,8 @@
 
 # Soal 2
 
+### Dikerjakan oleh Nathan Kho Pancras (5027231002)
+
 ## Deskripsi Soal
 
 Max Verstappen 🏎️ seorang pembalap F1 dan programer memiliki seorang adik bernama Min Verstappen (masih SD) sedang menghadapi tahap paling kelam dalam kehidupan yaitu perkalian matematika, Min meminta bantuan Max untuk membuat kalkulator perkalian sederhana (satu sampai sembilan). Sembari Max nguli dia menyuruh Min untuk belajar perkalian dari web (referensi) agar tidak bergantung pada kalkulator.
@@ -251,6 +253,8 @@ Dimana output juga dipengaruhi oleh program_mode.
 ![soal_2 output](assets/soal2_out.png)
 
 # Soal 3
+
+### Dikerjakan oleh Nathan Kho Pancras (5027231002)
 
 ## Deskripsi Soal
 
