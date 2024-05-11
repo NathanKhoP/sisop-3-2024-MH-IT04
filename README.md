@@ -17,11 +17,300 @@
 
 # Soal 1
 
+# Soal 1
+
+### Dikerjakan oleh Muhammad Ida Bagus Rafi Habibibie (5027221059)
+
+
 ## Deskripsi Soal
 
-### Catatan
+Pada zaman dahulu pada galaksi yang jauh-jauh sekali, hiduplah seorang Stelle. Stelle adalah seseorang yang sangat tertarik dengan Tempat Sampah dan Parkiran Luar Angkasa. Stelle memulai untuk mencari Tempat Sampah dan Parkiran yang terbaik di angkasa. Dia memerlukan program untuk bisa secara otomatis mengetahui Tempat Sampah dan Parkiran dengan rating terbaik di angkasa.**
 
 ## Pengerjaan
+
+Jadi sesuai dengan permintaan soal,yakni Membuat Sistem Microservice untuk Menemukan Tempat Sampah dan Parkiran Luar Angkasa,dengan terdiri dari 3 program yang akan menjalankannya yakni,auth.c,db.c,dan rate.c
+
+### Persiapan
+* Buat struktur direktori yang akan digunakan untuk proyek ini. Struktur direktori awal akan terdiri dari tiga folder: `auth.c`, `microservices`, dan `new-data`.
+
+```
+├── auth.c
+├── microservices
+│   ├── database
+│   └── db.c
+├── rate.c
+└── new-data
+    ├── belobog_trashcan.csv
+    ├── ikn.csv
+    └── osaka_parkinglot.csv
+```
+* Persiapkan File-file Pendukung
+    
+    -   Siapkan file `auth.c`, `rate.c`, dan `db.c` di dalam direktori proyek.
+    -   Siapkan file-file CSV dengan data Tempat Sampah dan Parkiran di dalam folder `new-data`,dengan isi filenya sebagai berikut:
+    ```
+    file belobog_trashcan.csv
+    name, rating 
+    Qlipoth Fort, 9.7 
+    Everwinter Hill, 8.7 
+    River Town, 6.8
+    ```
+    dan
+    ```
+    file Osaka_parkinglot.csv 
+    name, rating 
+    Dotonbori, 8.6 
+    Kiseki, 9.7 
+    Osaka Castle, 8.5
+    ```
+### Langkah Pengerjaan
+1. ***Buatlah program `auth.c`***
+yang akan mengautentikasi file yang masuk ke dalam folder `new-data`.
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+
+#define MAX_FILENAME_LENGTH 256
+#define SHM_SIZE 1024
+
+int main() {
+    DIR *dir;
+    struct dirent *entry;
+    dir = opendir("new-data");
+    if (dir) {
+        key_t key = ftok(".", 'a');
+        int shmid = shmget(key, SHM_SIZE, IPC_CREAT | 0666);
+        if (shmid == -1) {
+            perror("shmget");
+            exit(EXIT_FAILURE);
+        }
+        char *shm = shmat(shmid, NULL, 0);
+        if (shm == (char *)-1) {
+            perror("shmat");
+            exit(EXIT_FAILURE);
+        }
+        
+        while ((entry = readdir(dir)) != NULL) {
+            char *filename = entry->d_name;
+            int len = strlen(filename);
+            if (len >= 17 && strcmp(filename + len - 17, "_trashcan.csv") == 0) {
+                char command[MAX_FILENAME_LENGTH];
+                sprintf(command, "cp new-data/%s Documents/microservices/database/%s", filename, filename);
+                strcpy(shm, command);
+            } else if (len >= 20 && strcmp(filename + len - 20, "_parkinglot.csv") == 0) {
+                char command[MAX_FILENAME_LENGTH];
+                sprintf(command, "cp new-data/%s Documents/microservices/database/%s", filename, filename);
+                strcpy(shm, command);
+            } else {
+                char command[MAX_FILENAME_LENGTH];
+                sprintf(command, "rm new-data/%s", filename);
+                strcpy(shm, command);
+            }
+        }
+        
+       
+        if (shmdt(shm) == -1) {
+            perror("shmdt");
+            exit(EXIT_FAILURE);
+        }
+
+       
+        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+            perror("shmctl");
+            exit(EXIT_FAILURE);
+        }
+        
+        closedir(dir);
+    }
+
+    return 0;
+}
+
+
+```
+*   Pastikan program dapat mengidentifikasi file-file yang memenuhi kriteria autentikasi 
+*  Jika file tidak memenuhi kriteria, program akan menghapusnya secara otomatis.
+*  File-file yang lolos autentikasi akan dikirim ke shared memory untuk diproses oleh program lain.
+
+
+2.  ***Implementasi Manajemen Basis Data pada `db.c`***
+    
+   *  Buat program `db.c` untuk memindahkan file dari folder `new-data` ke dalam folder `microservices/database`.
+   ```c
+   #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <time.h>
+
+#define MAX_FILENAME_LENGTH 256
+#define SHM_SIZE 1024
+
+int main() {
+    key_t key = ftok(".", 'b');
+
+    int shmid = shmget(key, SHM_SIZE, 0666);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(EXIT_FAILURE);
+    }
+    char *shm = shmat(shmid, NULL, 0);
+    if (shm == (char *)-1) {
+        perror("shmat");
+        exit(EXIT_FAILURE);
+    }
+    
+    char command[MAX_FILENAME_LENGTH];
+    strcpy(command, shm);
+    system(command);
+    
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(EXIT_FAILURE);
+    }
+
+    char type[MAX_FILENAME_LENGTH];
+    char filename[MAX_FILENAME_LENGTH];
+    sscanf(command, "%*[^[][%[^]]] [%[^]]]", type, filename);
+
+    FILE *fp;
+    fp = fopen("microservices/database/db.log", "a");
+    if (fp == NULL) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+
+    time_t rawtime;
+    struct tm *timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    fprintf(fp, "[%02d/%02d/%02d %02d:%02d:%02d] [%s] [%s]\n",
+            timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year % 100,
+            timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec,
+            type, filename);
+
+    fclose(fp);
+
+    return 0;
+}
+
+
+   ```
+   
+   * Proses pemindahan file menggunakan shared memory untuk berbagi informasi dengan program lain.
+    * Setiap file yang dipindahkan akan dicatat ke dalam file `db.log`, mencatat waktu dan jenis (Trash Can atau Parking Lot) dari setiap file yang diproses.
+
+3.***Implementasi Penilaian pada `rate.c`***
+    
+   * Buat program `rate.c` untuk mengambil data CSV dari shared memory.
+   ```c
+  #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_FILENAME_LENGTH 256
+
+typedef struct {
+    char name[MAX_FILENAME_LENGTH];
+    float rating;
+} Place;
+
+void printBestPlace(Place place, const char *type) {
+    printf("Type: %s\n", type);
+    printf("Filename: %s\n", place.name);
+    printf("------------------\n");
+    printf("Name: %s\n", place.name);
+    printf("Rating: %.1f\n", place.rating);
+}
+
+int main() {
+    Place trashCan = {"", 0};
+    Place parkingLot = {"", 0};
+
+    FILE *file;
+    char filename[MAX_FILENAME_LENGTH];
+    float rating;
+    char type[MAX_FILENAME_LENGTH];
+
+    file = fopen("/Documents/microservices/database/belobog_trashcan.csv", "r");
+    if (file) {
+        while (fscanf(file, "%s %f", filename, &rating) == 2) {
+            if (rating > trashCan.rating) {
+                trashCan.rating = rating;
+                strcpy(trashCan.name, filename);
+            }
+        }
+        fclose(file);
+    }
+
+    file = fopen("/Documents/microservices/database/osaka_parkinglot.csv", "r");
+    if (file) {
+        while (fscanf(file, "%s %f", filename, &rating) == 2) {
+            if (rating > parkingLot.rating) {
+                parkingLot.rating = rating;
+                strcpy(parkingLot.name, filename);
+            }
+        }
+        fclose(file);
+    }
+
+    printBestPlace(trashCan, "Trash Can");
+    printBestPlace(parkingLot, "Parking Lot");
+
+    return 0;
+} 
+   ```
+ 
+   * Program akan menampilkan Tempat Sampah dan Parkiran dengan rating terbaik dari data tersebut.
+   * Output akan mencakup nama file, tipe (Trash Can atau Parking Lot), serta nama dan rating Tempat Sampah atau Parkiran terbaik.
+   
+
+4.***menjalankannya***
+* Langkah 1: Kompilasi Program
+Pastikan mengkompilasi setiap program menggunakan compiler C,menggunakan perintah berikut pada terminal:
+```
+gcc -o auth auth.c
+gcc -o db db.c
+gcc -o rate rate.c
+```
+* Langkah 2: Menjalankan Program `auth`
+-Buka terminal dan pindahkan direktori kerja ke lokasi di mana file program `auth` berada.
+ -Jalankan program `auth` dengan perintah berikut:
+ ```
+ ./auth
+ ```
+ -Program `auth` akan melakukan autentikasi file-file CSV di direktori `new-data` dan memindahkan file yang lulus autentikasi ke dalam shared memory.
+
+* Menjalankan Program `db`
+
+-Setelah program `auth` selesai dijalankan, buka terminal baru atau jalankan program `db` di terminal yang sama.   
+-Pindahkan direktori kerja ke lokasi di mana file program `db` berada.   
+-Jalankan program `db` dengan perintah berikut:
+```
+./db
+```
+       
+ -Program `db` akan memindahkan file-file yang lulus autentikasi ke dalam direktori `microservices/database` dan mencatat setiap file yang masuk ke dalam file log `db.log`.
+    
+
+*Menjalankan Program `rate`
+-Setelah program `db` selesai dijalankan, buka terminal baru atau jalankan -program `rate` di terminal yang sama.
+-Pindahkan direktori kerja Anda ke lokasi di mana file program `rate` berada.
+-Jalankan program `rate` dengan perintah berikut:
+```
+./rate
+```
+ -Program `rate` akan membaca data CSV dari shared memory dan mencetak tempat sampah dan parkiran dengan rating tertinggi.
+ 
+
+ 
+
 
 # Soal 2
 
