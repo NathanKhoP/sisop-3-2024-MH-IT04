@@ -9,28 +9,6 @@
 #define BUFFER_SIZE 1024 
 #define PORT 8080
 
-// Fungsi untuk mengunduh file dari URL
-void download_file(const char* url, const char* file_name) {
-  // Perintah untuk mengunduh file dari URL menggunakan curl
-  char command[1024];
-  sprintf(command, "curl -L -o  ../%s \"%s\"", file_name, url);
-
-  // Mengecek apakah file sudah ada
-  FILE* file = fopen(file_name, "r");
-  if (file) {
-    printf("File sudah ada\n");
-    fclose(file);
-    }
-  else {
-    // Mengunduh file jika belum ada
-    printf("Mengunduh file...\n");
-    system(command);
-    }
-
-
-
-  }
-
 char* get_new_anime(const char* buffer) {
   char* anime_info;
   char* token;
@@ -184,13 +162,6 @@ void log_command(const char* action, const char* cmd, int sock) {
   }
 
 int main(int argc, char const* argv[]) {
-  // URL dari file yang ingin diunduh
-  const char url[] = "https://drive.google.com/uc?id=10p_kzuOgaFY3WT6FVPJIXFbkej2s9f50&export=download";
-  const char file_name[] = "../myanimelist.csv"; // Sesuaikan dengan nama file yang diinginkan
-
-  // Memanggil fungsi untuk mengunduh file
-  download_file(url, file_name);
-
   int server_fd, new_socket, valread;
   struct sockaddr_in address;
   int opt = 1;
@@ -234,7 +205,7 @@ int main(int argc, char const* argv[]) {
     if (valread > 0) {
       if (strcmp(buffer, "exit") == 0) {
         printf("Received: %s\n", buffer);
-        char* exit = "Server:\nExiting the client\n";
+        char* exit = "\nExiting the client\n";
         send(new_socket, exit, strlen(exit), 0);
         break; // Keluar dari loop
         }
