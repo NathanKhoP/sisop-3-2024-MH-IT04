@@ -307,10 +307,11 @@ gcc -o rate rate.c
 ./rate
 ```
  -Program `rate` akan membaca data CSV dari shared memory dan mencetak tempat sampah dan parkiran dengan rating tertinggi.
- 
+
+ ### output
+ ![soal 1 output](assets/soal1_output.png)
 
  
-
 
 # Soal 2
 
